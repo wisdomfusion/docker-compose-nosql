@@ -46,3 +46,11 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME:?err}:${MONGO_INITDB_ROOT_PASSWORD:?err}@mongo:27017/
     networks: 
       - nosqlnet
+
+  memcached:
+    image: memcached:alpine
+    container_name: ${APP_NAME:?err}-memcached
+    ports:
+      - 11211:11211
+    networks: 
+      - nosqlnet
