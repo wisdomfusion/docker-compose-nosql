@@ -1,0 +1,48 @@
+version: '3.8'
+
+networks:
+  nosqlnet:
+    driver: bridge
+
+services:
+
+  redis:
+    image: redis:alpine
+    container_name: ${APP_NAME:?err}-redis
+    restart: always
+    ports:
+      - 6379:6379
+    command: >
+      --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./data/redis:/data
+    networks: 
+      - nosqlnet
+
+  mongo:
+    image: mongo
+    container_name: ${APP_NAME:?err}-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongo:/data/db
+      - ./conf/mongo/configdb:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:?err}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?err}
+    networks: 
+      - nosqlnet
+    
+  mongo-express:
+    image: mongo-express
+    container_name: ${APP_NAME:?err}-me
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME:?err}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:?err}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME:?err}:${MONGO_INITDB_ROOT_PASSWORD:?err}@mongo:27017/
+    networks: 
+      - nosqlnet
